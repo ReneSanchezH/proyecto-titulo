@@ -2,7 +2,7 @@ import Sidebar from "@/components/Sidebar";
 import "./globals.css";
 import { SessionProvider } from "./contexts/sessionProvider";
 import { getServerSession } from "next-auth";
-import { handler } from "./api/auth/[...nextauth]/route";
+import { GET } from "./api/auth/[...nextauth]/route";
 import Login from "@/components/Login";
 
 export const metadata = {
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const session = await getServerSession(handler);
+  const session = await getServerSession(GET);
   return (
     <html lang="es">
       <body>
