@@ -6,6 +6,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { db } from "../utils/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
+// Create a new chat
 function NewChat() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -19,23 +20,18 @@ function NewChat() {
     console.log("Usuario:", session.user.email);
 
     // Users collection: each user (by email) has a subcollection of chats with messages
-    
     try {
       const document = await addDoc(
-        collection(db, 'users', session?.user?.email, 'chats'),
+        collection(db, "users", session?.user?.email, "chats"),
         {
-          messages: [],
           userId: session?.user?.email,
           createdAt: serverTimestamp(),
         }
       );
-      router.push(`/chats/${document.id}`);
+      router.push(`/chat/${document.id}`);
     } catch (error) {
       console.error("Error al agregar el chat:", error);
     }
-
-
-
   };
 
   return (

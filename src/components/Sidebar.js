@@ -1,11 +1,27 @@
 "use client";
-import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
 import NewChat from "./NewChat";
 import { useSession, signOut } from "next-auth/react";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { query, collection, orderBy } from "firebase/firestore";
+import { db } from "@/utils/firebase";
+import ChatRow from "./ChatRow";
 
+// new chat button
+//list of chats created by the user
+//user info 
+//logout button
 function Sidebar() {
   const { data: session } = useSession();
+
+  const [chats, loading, error] = useCollection(
+    session &&
+      query(
+        collection(db, "users", session?.user?.email, "chats"),
+        orderBy("createdAt", "asc")
+      )
+  );
 
   return (
     <div className="p-2 flex flex-col h-screen">
@@ -14,6 +30,9 @@ function Sidebar() {
           {/* New Chat */}
           <NewChat />
           {/* Map through the ChatRows */}
+          {chats?.docs.map((chat) => (
+            <ChatRow key={chat.id} id={chat.id} users={chat.data().users} />
+          ))}
         </div>
       </div>
 
