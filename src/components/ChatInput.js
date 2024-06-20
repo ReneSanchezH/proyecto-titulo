@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { db } from "@/utils/firebase";
 import { ArrowUpIcon } from "@heroicons/react/24/solid";
@@ -15,15 +15,11 @@ function ChatInput({ chatId }) {
 
   const sendMessage = async (e) => {
     // e : FormEvent<HTMLFormElement>
-    console.log("sending message...")
-    console.log("prompt: ", prompt)
-
+    console.log("sending message...");
+    console.log("prompt: ", prompt);
 
     e.preventDefault();
     if (!prompt) return;
-
-    
-
 
     // send the message to the chat
     const input = prompt.trim();
@@ -54,20 +50,25 @@ function ChatInput({ chatId }) {
 
     const notification = toast.loading("Loading...");
 
-    await fetch("api/askQuestion", {
+    await fetch("/api/askQuestion", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         prompt: input,
-        chatId,
-        model,
-        session,
+        chatId: chatId,
+        model: model,
+        session: session,
       }),
-    }).then(() => {
-      toast.success("success", { id: notification });
-    });
+    })
+      .then(() => {
+        toast.success("Success", { id: notification });
+      })
+      .catch((error) => {
+        toast.error("Error", { id: notification });
+        console.error("Error:", error);
+      });
   };
 
   return (
@@ -84,7 +85,6 @@ function ChatInput({ chatId }) {
 
         <button
           disabled={!session || !prompt}
-         
           type="submit"
           className={`relative flex items-center justify-center w-8 h-8 ${
             prompt ? "bg-white" : "bg-[#666666]"

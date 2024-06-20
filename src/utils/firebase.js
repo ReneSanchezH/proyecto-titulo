@@ -3,7 +3,7 @@ import { getFirestore } from "firebase/firestore";
 
 // web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyDTPEXQNfMWCwDH94XOBHXYKs6R9B4usds",
+    apiKey: process.env.FIREBASE_API_KEY,
     authDomain: "app-sorting-be0fa.firebaseapp.com",
     projectId: "app-sorting-be0fa",
     storageBucket: "app-sorting-be0fa.appspot.com",
