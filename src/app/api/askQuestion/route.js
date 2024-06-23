@@ -2,31 +2,41 @@
 
 import { adminDb } from "@/utils/firebaseAdmin";
 import query from "@/utils/gemini";
-import admin from 'firebase-admin'
+import admin from "firebase-admin";
 
 export async function handler(req) {
-    const { prompt, chatId, model, session } = await req.json();
-    if (!prompt || !chatId) {
-        return new Response(JSON.stringify({ message: "Bad request" }), { status: 400 });
-    }
-    console.log("ejecutando handler askQuestion... ");
-    // API call
-    const response = await query(prompt);
+  const { prompt, chatId, model, session } = await req.json();
+  if (!prompt || !chatId) {
+    return new Response(JSON.stringify({ message: "Bad request" }), {
+      status: 400,
+    });
+  }
+  console.log("ejecutando handler askQuestion... ");
+  // API call
+  const response = await query(prompt);
 
-    const message = {
-        text: response || "Error in processing the message",
-        createdAt: admin.firestore.Timestamp.now(),
-        user: {
-            _id: "Gemini",
-            name: "Gemini",
-            avatar: "https://ui-avatars.com/api/?name=Gpt",
-        },
-    };
+  const message = {
+    text: response || "Error in processing the message",
+    createdAt: admin.firestore.Timestamp.now(),
+    user: {
+      _id: "LLM API",
+      name: "LLM API",
+      avatar: "https://ui-avatars.com/api/?name=LLM",
+    },
+  };
 
-    // Save the response to the chat
-    await adminDb.collection('users').doc(session?.user?.email).collection('chats').doc(chatId).collection('messages').add(message);
+  // Save the response to the chat
+  await adminDb
+    .collection("users")
+    .doc(session?.user?.email)
+    .collection("chats")
+    .doc(chatId)
+    .collection("messages")
+    .add(message);
 
-    return new Response(JSON.stringify({ answer: message.text }), { status: 200 });
+  return new Response(JSON.stringify({ answer: message.text }), {
+    status: 200,
+  });
 }
 
 export { handler as GET, handler as POST };
