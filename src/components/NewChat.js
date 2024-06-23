@@ -6,7 +6,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { db } from "../utils/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
-// Create a new chat
+// button to create a new chat
 function NewChat() {
   const router = useRouter();
   const { data: session } = useSession();

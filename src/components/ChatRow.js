@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
 
-// list all the chats the user has created
+// list all the chats the user has created and display them in the sidebar
 /**
  * @param {string} props.id
  */

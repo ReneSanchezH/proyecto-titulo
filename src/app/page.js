@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 
+// Homepage
 function Homepage() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-white">

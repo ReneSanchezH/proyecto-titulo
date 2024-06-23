@@ -2,6 +2,7 @@
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 
+// login page
 function Login() {
   return (
     <div className="bg-[#212121] h-screen flex flex-col items-center justify-center text-center">

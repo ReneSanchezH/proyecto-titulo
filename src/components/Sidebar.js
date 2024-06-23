@@ -8,10 +8,7 @@ import { query, collection, orderBy } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import ChatRow from "./ChatRow";
 
-// new chat button
-//list of chats created by the user
-//user info 
-//logout button
+// Sidebar component
 function Sidebar() {
   const { data: session } = useSession();
 

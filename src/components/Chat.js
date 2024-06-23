@@ -7,7 +7,7 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "./Message";
 import Image from "next/image";
 
-// messages in the selected chat
+// retrieve messages from the database and display them in the chat
 function Chat({ chatId }) {
   const { data: session } = useSession();
 
@@ -35,7 +35,7 @@ function Chat({ chatId }) {
   }
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden">
       {messages?.docs.map((doc) => (
         <Message key={doc.id} message={doc.data()} />
       ))}

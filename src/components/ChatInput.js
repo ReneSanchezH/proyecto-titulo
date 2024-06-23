@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
 
-// box to write a new message in the chat
+// placeholder to write a new message in the chat
 function ChatInput({ chatId }) {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState("");
