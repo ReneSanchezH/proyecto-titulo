@@ -80,6 +80,33 @@ function ChatInput({ chatId }) {
       });
   };
 
+  const sendNumbers = async () => {
+    console.log("sending message...");
+    console.log("numbers: ", numbers);
+    if (!numbers) return;
+
+    const notification = toast.loading("Generating video...");
+
+    await fetch("http://127.0.0.1:5000/generate-video", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        numbers: numbers.split(",").map(Number),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        toast.success("Video generated successfully!", { id: notification });
+        console.log(data);
+      })
+      .catch((error) => {
+        toast.error("Error generating video", { id: notification });
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <div className="bg-[#2e2e2e] text-white rounded-md text-sm">
       <NumberInput onInputChange={handleInputChange} />
@@ -110,6 +137,13 @@ function ChatInput({ chatId }) {
           />
         </button>
       </form>
+
+      <button
+        onClick={sendNumbers}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+      >
+        Generate Video
+      </button>
     </div>
   );
 }
