@@ -6,4 +6,24 @@
     .chatRow {
         @apply rounded-lg px-5 py-3 text-sm flex items-center justify-center space-x-2 hover:bg-gray-700/70 cursor-pointer text-gray-300 transition-all duration-200 ease-out;
     }
+
+    input[type="radio"] {
+    @apply appearance-none bg-[#2e2e2e] border border-white w-4 h-4 rounded-full relative cursor-pointer;
+  }
+
+  input[type="radio"]:checked::before {
+    content: '';
+    @apply block bg-white rounded-full absolute;
+    width: 50%;
+    height: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+
+    input[type="text"]:focus {
+        @apply border-white outline-none;
+    }
+    
 }

@@ -7,11 +7,20 @@ import { useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
 
+import NumberInput from "./NumerInput";
+
 // placeholder to write a new message in the chat
 function ChatInput({ chatId }) {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState("");
-  const model = "gpt-3";
+  const model = "LLM API";
+
+  const [numbers, setNumbers] = useState("");
+
+  const handleInputChange = (value) => {
+    setNumbers(value);
+    console.log(value); // Aquí puedes manejar lo que quieras hacer con los números ingresados
+  };
 
   const sendMessage = async (e) => {
     // e : FormEvent<HTMLFormElement>
@@ -73,6 +82,9 @@ function ChatInput({ chatId }) {
 
   return (
     <div className="bg-[#2e2e2e] text-white rounded-md text-sm">
+      <NumberInput onInputChange={handleInputChange} />
+      <hr className="border-gray-600 my-2" />
+
       <form onSubmit={sendMessage} className="p-5 space-x-5 flex">
         <input
           className="flex-1 bg-transparent focus:outline-none disabled:cursor-not-allowed disabled:text-gray-300"
@@ -98,7 +110,6 @@ function ChatInput({ chatId }) {
           />
         </button>
       </form>
-      <div>{/*Model selection*/}</div>
     </div>
   );
 }
