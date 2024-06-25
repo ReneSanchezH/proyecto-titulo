@@ -6,12 +6,12 @@ function NumberInput({ onInputChange }) {
   const [inputValue, setInputValue] = useState("");
 
   const generateRandomNumbers = () => {
-    let randomNumbers = "";
+    let randomNumbers = [];
     for (let i = 0; i < 10; i++) {
       // Generar 10 números aleatorios
-      randomNumbers += Math.floor(Math.random() * 10);
+      randomNumbers.push(Math.floor(Math.random() * 100)); // Números entre 0 y 99
     }
-    return randomNumbers;
+    return randomNumbers.join(",");
   };
 
   const handleRadioChange = (e) => {
@@ -60,10 +60,10 @@ function NumberInput({ onInputChange }) {
       {!isRandom && (
         <input
           type="text"
-          placeholder="Enter numbers without spaces"
+          placeholder="Enter numbers separated by commas"
           value={inputValue}
           onChange={handleInputChange}
-           className="ml-2 p-2 border rounded bg-[#2e2e2e] text-white w-64"
+          className="ml-2 p-2 border rounded bg-[#2e2e2e] text-white w-64"
         />
       )}
     </div>

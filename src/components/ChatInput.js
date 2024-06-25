@@ -7,9 +7,8 @@ import { useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
 
-import NumberInput from "./NumerInput";
+import NumberInput from "./NumberInput";
 
-// placeholder to write a new message in the chat
 function ChatInput({ chatId }) {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState("");
@@ -93,7 +92,7 @@ function ChatInput({ chatId }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        numbers: numbers.split(",").map(Number),
+        numbers: numbers.replace(/\s+/g, ""), // Ensure no spaces are included
       }),
     })
       .then((res) => res.json())
