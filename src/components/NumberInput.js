@@ -7,10 +7,31 @@ function NumberInput({ onInputChange }) {
 
   const generateRandomNumbers = () => {
     let randomNumbers = [];
-    for (let i = 0; i < 10; i++) {
-      // Generar 10 números aleatorios
-      randomNumbers.push(Math.floor(Math.random() * 100)); // Números entre 0 y 99
+
+    // Generate 2 numbers between 0 and 9
+    for (let i = 0; i < 2; i++) {
+      randomNumbers.push(Math.floor(Math.random() * 10)); // Numbers between 0 and 9
     }
+
+    // Generate 4 numbers between 10 and 99
+    for (let i = 0; i < 4; i++) {
+      randomNumbers.push(Math.floor(Math.random() * 90) + 10); // Numbers between 10 and 99
+    }
+
+    // Generate 4 numbers between 100 and 999
+    for (let i = 0; i < 4; i++) {
+      randomNumbers.push(Math.floor(Math.random() * 900) + 100); // Numbers between 100 and 999
+    }
+
+    // Shuffle the array
+    for (let i = randomNumbers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [randomNumbers[i], randomNumbers[j]] = [
+        randomNumbers[j],
+        randomNumbers[i],
+      ];
+    }
+
     return randomNumbers.join(",");
   };
 

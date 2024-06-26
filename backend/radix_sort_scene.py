@@ -12,14 +12,34 @@ class RadixSortScene(Scene):
         # Convertir los enteros a cadenas para mostrarlos en la tabla
         string_array = [str(num) for num in integer_array]
 
-        # Crear la tabla inicial en horizontal
+        # Determinar la escala según el tamaño del arreglo y la longitud de los números
+        array_length = len(integer_array)
+        three_digit_count = sum(1 for num in integer_array if 100 <= num < 1000)
+
+        if array_length <= 5:
+            scale_factor = 1.2
+        elif array_length <= 7:
+            scale_factor = 1.0
+        elif array_length <= 9:
+            scale_factor = 0.8
+        elif array_length <= 10:
+            scale_factor = 0.7
+        else:
+            scale_factor = 0.5
+
+        # Reducir la escala si más de la mitad de los números tienen tres dígitos
+        if three_digit_count <= 3:
+            scale_factor -= 0.1
+        elif three_digit_count <= 5:
+            scale_factor -= 0.2
+        else:
+            scale_factor -= 0.3        
+
+        # Crear la tabla inicial en horizontal y ajustar la escala
         table = Table(
             [string_array],
             include_outer_lines=True
-        )
-
-        # Ajustar la escala de la tabla para que quepa en la escena
-        table.scale(0.8)
+        ).scale(scale_factor)
 
         # Animar la aparición de la tabla
         self.play(Create(table))
@@ -74,7 +94,7 @@ class RadixSortScene(Scene):
             intermediate_array = integer_array[:]
             counting_sort(intermediate_array, exp)
             string_intermediate_array = [str(num) for num in intermediate_array]
-            new_table = Table([string_intermediate_array], include_outer_lines=True).scale(0.8)
+            new_table = Table([string_intermediate_array], include_outer_lines=True).scale(scale_factor)
 
             # Crear un texto para indicar la etapa
             stage_text = Text(f"Etapa {i}: Ordenando por el dígito de las {['unidades', 'decenas', 'centenas'][i-1]}").scale(0.5).to_edge(UP)
@@ -85,7 +105,7 @@ class RadixSortScene(Scene):
 
         # Mostrar la tabla final ordenada
         sorted_string_array = [str(num) for num in sorted_array]
-        final_table = Table([sorted_string_array], include_outer_lines=True).scale(0.8)
+        final_table = Table([sorted_string_array], include_outer_lines=True).scale(scale_factor)
         final_text = Text("Arreglo Final Ordenado").scale(0.5).to_edge(UP)
         self.play(Transform(table, final_table), FadeIn(final_text))
         self.wait(2)
