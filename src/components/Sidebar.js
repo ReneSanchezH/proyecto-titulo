@@ -3,14 +3,16 @@
 import NewChat from "./NewChat";
 import { useSession, signOut } from "next-auth/react";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+import { ArrowRightStartOnRectangleIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { query, collection, orderBy } from "firebase/firestore";
 import { db } from "@/utils/firebase";
 import ChatRow from "./ChatRow";
+import { useState } from "react";
 
 // Sidebar component
 function Sidebar() {
   const { data: session } = useSession();
+  const [collapsed, setCollapsed] = useState(false);
 
   const [chats, loading, error] = useCollection(
     session &&
@@ -21,19 +23,29 @@ function Sidebar() {
   );
 
   return (
-    <div className="p-2 flex flex-col h-screen">
-      <div className="flex-1 ">
-        <div>
-          {/* New Chat */}
-          <NewChat />
-          {/* Map through the ChatRows */}
-          {chats?.docs.map((chat) => (
-            <ChatRow key={chat.id} id={chat.id} users={chat.data().users} />
-          ))}
+    <div className={`flex flex-col h-screen ${collapsed ? 'w-20' : 'w-64'} transition-all duration-300`}>
+      <div className="p-2 flex flex-col h-full">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 hover:bg-gray-700 focus:outline-none transition-colors duration-200 ease-out"
+          title={collapsed ? "Abrir barra lateral" : "Colapsar barra lateral"}
+        >
+          {collapsed ? (
+            <ChevronRightIcon className="h-6 w-6 text-white" />
+          ) : (
+            <ChevronLeftIcon className="h-6 w-6 text-white" />
+          )}
+        </button>
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'hidden' : 'block'}`}>
+          <div>
+            <NewChat />
+            {chats?.docs.map((chat) => (
+              <ChatRow key={chat.id} id={chat.id} users={chat.data().users} />
+            ))}
+          </div>
         </div>
       </div>
-
-      <div className="p-4">
+      <div className={`p-4 ${collapsed ? 'hidden' : 'block'}`}>
         {session?.user?.image && (
           <div className="flex flex-col items-center space-y-4 mb-4">
             <div className="flex items-center space-x-4">

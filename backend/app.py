@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-output_dir = os.path.join(os.path.dirname(__file__), 'public')
+output_dir = os.path.join(os.path.dirname(__file__), 'videos')
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -23,10 +23,11 @@ def generate_video():
         # Convert the string of comma-separated numbers to a list of integers
         try:
             numbers = [int(num) for num in numbers_string.split(',')]
+            formatted_string = ''.join(numbers_string.split(','))
         except ValueError:
             return jsonify({"error": "Invalid input format"}), 400
         
-        output_file = os.path.join(output_dir, 'sort_video.mp4')
+        output_file = os.path.join(output_dir, f'{formatted_string}.mp4')
         
         config.media_dir = output_dir
         config.output_file = output_file
@@ -38,13 +39,13 @@ def generate_video():
         scene = RadixSortSceneWrapper()
         scene.render()
         
-        video_url = '/public/sort_video.mp4'
+        video_url = f'/videos/{formatted_string}.mp4'
         return jsonify({"message": "Video generated successfully!", "video_url": video_url})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/public/<path:filename>', methods=['GET'])
+@app.route('/videos/<path:filename>', methods=['GET'])
 def serve_video(filename):
     try:
         return send_from_directory(output_dir, filename)

@@ -2,7 +2,13 @@
 
 import { db } from "@/utils/firebase";
 import { ArrowUpIcon } from "@heroicons/react/24/solid";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
@@ -12,27 +18,23 @@ import NumberInput from "./NumberInput";
 function ChatInput({ chatId }) {
   const { data: session } = useSession();
   const [prompt, setPrompt] = useState("");
-  const model = "LLM API";
-
   const [numbers, setNumbers] = useState("");
+
+  const model = "LLM API";
 
   const handleInputChange = (value) => {
     setNumbers(value);
-    console.log(value); // Aquí puedes manejar lo que quieras hacer con los números ingresados
+    console.log(value);
   };
 
   const sendMessage = async (e) => {
-    // e : FormEvent<HTMLFormElement>
-    console.log("sending message...");
-    console.log("prompt: ", prompt);
-
     e.preventDefault();
     if (!prompt) return;
 
-    // send the message to the chat
     const input = prompt.trim();
     setPrompt("");
-    const message = {
+
+    const userMessage = {
       text: input,
       createdAt: serverTimestamp(),
       user: {
@@ -44,6 +46,9 @@ function ChatInput({ chatId }) {
       },
     };
 
+    const notification = toast.loading("Loading...");
+
+    // Guardar el mensaje del usuario
     await addDoc(
       collection(
         db,
@@ -53,10 +58,37 @@ function ChatInput({ chatId }) {
         chatId,
         "messages"
       ),
-      message
+      userMessage
     );
 
-    const notification = toast.loading("Loading...");
+    // Crear el mensaje del LLM con un placeholder
+    const llmMessage = {
+      text: "Processing...",
+      createdAt: serverTimestamp(),
+      user: {
+        _id: "LLM API",
+        name: "LLM API",
+        avatar: "https://ui-avatars.com/api/?name=LLM",
+      },
+      videoUrl: null, // Inicialmente nulo
+    };
+
+    const llmMessageRef = await addDoc(
+      collection(
+        db,
+        "users",
+        session?.user?.email,
+        "chats",
+        chatId,
+        "messages"
+      ),
+      llmMessage
+    );
+
+    let videoUrl = "";
+    if (numbers) {
+      videoUrl = await sendNumbers(numbers, notification);
+    }
 
     await fetch("/api/askQuestion", {
       method: "POST",
@@ -70,8 +102,15 @@ function ChatInput({ chatId }) {
         session: session,
       }),
     })
-      .then(() => {
-        toast.success("Success", { id: notification });
+      .then(async (res) => {
+        const data = await res.json();
+        toast.success("LLM success", { id: notification });
+
+        // Actualizar el mensaje del LLM con la respuesta y la URL del video
+        await updateDoc(doc(db, "users", session?.user?.email, "chats", chatId, "messages", llmMessageRef.id), {
+          text: data.answer,
+          videoUrl: videoUrl || null,
+        });
       })
       .catch((error) => {
         toast.error("Error", { id: notification });
@@ -79,14 +118,12 @@ function ChatInput({ chatId }) {
       });
   };
 
-  const sendNumbers = async () => {
+  const sendNumbers = async (numbers, notification) => {
     console.log("sending message...");
     console.log("numbers: ", numbers);
-    if (!numbers) return;
+    if (!numbers) return "";
 
-    const notification = toast.loading("Generating video...");
-
-    await fetch("http://127.0.0.1:5000/generate-video", {
+    return await fetch("http://127.0.0.1:5000/generate-video", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -99,10 +136,12 @@ function ChatInput({ chatId }) {
       .then((data) => {
         toast.success("Video generated successfully!", { id: notification });
         console.log(data);
+        return data.video_url;
       })
       .catch((error) => {
         toast.error("Error generating video", { id: notification });
         console.error("Error:", error);
+        return "";
       });
   };
 
@@ -136,13 +175,6 @@ function ChatInput({ chatId }) {
           />
         </button>
       </form>
-
-      <button
-        onClick={sendNumbers}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-      >
-        Generate Video
-      </button>
     </div>
   );
 }
