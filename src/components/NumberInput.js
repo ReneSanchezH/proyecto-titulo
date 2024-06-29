@@ -2,8 +2,9 @@
 import { useState } from "react";
 
 function NumberInput({ onInputChange }) {
-  const [isRandom, setIsRandom] = useState(true);
+  const [isRandom, setIsRandom] = useState(null); // No pre-seleccionado por defecto
   const [inputValue, setInputValue] = useState("");
+  const [inputError, setInputError] = useState(""); // Para manejar el error
 
   const generateRandomNumbers = () => {
     let randomNumbers = [];
@@ -38,6 +39,7 @@ function NumberInput({ onInputChange }) {
   const handleRadioChange = (e) => {
     const value = e.target.value === "random";
     setIsRandom(value);
+    setInputError(""); // Resetear el error
     if (value) {
       const randomNumbers = generateRandomNumbers();
       setInputValue(randomNumbers);
@@ -52,6 +54,14 @@ function NumberInput({ onInputChange }) {
     const value = e.target.value.replace(/\s+/g, ""); // Remover espacios
     setInputValue(value);
     onInputChange(value);
+
+    // Validación del formato
+    const isValid = /^(\d+,)*\d+$/.test(value);
+    if (!isValid && value) {
+      setInputError("Por favor ingrese números separados por comas");
+    } else {
+      setInputError("");
+    }
   };
 
   return (
@@ -61,7 +71,7 @@ function NumberInput({ onInputChange }) {
           type="radio"
           name="mode"
           value="random"
-          checked={isRandom}
+          checked={isRandom === true}
           onChange={handleRadioChange}
           className="text-white"
         />
@@ -72,20 +82,27 @@ function NumberInput({ onInputChange }) {
           type="radio"
           name="mode"
           value="manual"
-          checked={!isRandom}
+          checked={isRandom === false}
           onChange={handleRadioChange}
           className="text-white"
         />
         Manual
       </label>
-      {!isRandom && (
-        <input
-          type="text"
-          placeholder="Enter numbers separated by commas"
-          value={inputValue}
-          onChange={handleInputChange}
-          className="ml-2 p-2 border rounded bg-[#2e2e2e] text-white w-64"
-        />
+      {isRandom === false && (
+        <div className="flex flex-col">
+          <input
+            type="text"
+            placeholder="Enter numbers separated by commas"
+            value={inputValue}
+            onChange={handleInputChange}
+            className={`ml-2 p-2 border ${
+              inputError ? "border-red-500" : "border-gray-300"
+            } rounded bg-[#2e2e2e] text-white w-64`}
+          />
+          {inputError && (
+            <span className="text-red-500 text-sm">{inputError}</span>
+          )}
+        </div>
       )}
     </div>
   );

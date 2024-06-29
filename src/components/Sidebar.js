@@ -1,3 +1,4 @@
+// src/components/sidebar.js
 "use client";
 
 import NewChat from "./NewChat";
@@ -9,7 +10,6 @@ import { db } from "@/utils/firebase";
 import ChatRow from "./ChatRow";
 import { useState } from "react";
 
-// Sidebar component
 function Sidebar() {
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -23,7 +23,7 @@ function Sidebar() {
   );
 
   return (
-    <div className={`flex flex-col h-screen ${collapsed ? 'w-20' : 'w-64'} transition-all duration-300`}>
+    <div className={`bg-[#171717] flex flex-col h-screen transition-all duration-300 ${collapsed ? 'w-24' : 'w-64'}`}>
       <div className="p-2 flex flex-col h-full">
         <button
           onClick={() => setCollapsed(!collapsed)}

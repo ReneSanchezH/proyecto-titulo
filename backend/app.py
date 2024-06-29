@@ -2,7 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 from manim import config
 from radix_sort_scene import RadixSortScene
+from radix_detailed_scene import RadixDetailedScene  # Importar escena detallada
 from flask_cors import CORS
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.data import find
 
 app = Flask(__name__)
 CORS(app)
@@ -11,11 +15,23 @@ output_dir = os.path.join(os.path.dirname(__file__), 'videos')
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
+# Verificar y descargar recursos de nltk si es necesario
+try:
+    find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+def should_generate_detailed_video(prompt):
+    detailed_keywords = ["detallado", "detalles", "explicaciones", "explicación"]
+    tokens = word_tokenize(prompt.lower())
+    return any(word in tokens for word in detailed_keywords)
+
 @app.route('/generate-video', methods=['POST'])
 def generate_video():
     try:
         data = request.json
         numbers_string = data.get('numbers')
+        prompt = data.get('prompt')  # Añadir el prompt al payload de la solicitud
 
         if not numbers_string or not isinstance(numbers_string, str):
             return jsonify({"error": "Invalid input format"}), 400
@@ -32,11 +48,19 @@ def generate_video():
         config.media_dir = output_dir
         config.output_file = output_file
 
-        class RadixSortSceneWrapper(RadixSortScene):
-            def __init__(self, **kwargs):
-                super().__init__(numbers, **kwargs)
-        
-        scene = RadixSortSceneWrapper()
+        if should_generate_detailed_video(prompt):
+            class RadixDetailedSceneWrapper(RadixDetailedScene):
+                def __init__(self, **kwargs):
+                    super().__init__(numbers, **kwargs)
+            
+            scene = RadixDetailedSceneWrapper()
+        else:
+            class RadixSortSceneWrapper(RadixSortScene):
+                def __init__(self, **kwargs):
+                    super().__init__(numbers, **kwargs)
+            
+            scene = RadixSortSceneWrapper()
+
         scene.render()
         
         video_url = f'/videos/{formatted_string}.mp4'

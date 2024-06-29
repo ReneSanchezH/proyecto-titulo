@@ -2,13 +2,7 @@
 
 import { db } from "@/utils/firebase";
 import { ArrowUpIcon } from "@heroicons/react/24/solid";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, updateDoc, doc } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
@@ -34,32 +28,23 @@ function ChatInput({ chatId }) {
     const input = prompt.trim();
     setPrompt("");
 
+    const notification = toast.loading("Loading...");
+
     const userMessage = {
       text: input,
+      numbers: numbers.trim(), 
       createdAt: serverTimestamp(),
       user: {
         _id: session?.user?.email,
         name: session?.user?.name,
-        avatar:
-          session.user.image ||
-          `https://ui-avatars.com/api/?name=${session.user.name}`,
+        avatar: session.user.image || `https://ui-avatars.com/api/?name=${session.user.name}`,
       },
     };
 
-    const notification = toast.loading("Loading...");
+    
 
     // Guardar el mensaje del usuario
-    await addDoc(
-      collection(
-        db,
-        "users",
-        session?.user?.email,
-        "chats",
-        chatId,
-        "messages"
-      ),
-      userMessage
-    );
+    await addDoc(collection(db, "users", session?.user?.email, "chats", chatId, "messages"), userMessage);
 
     // Crear el mensaje del LLM con un placeholder
     const llmMessage = {
@@ -73,36 +58,28 @@ function ChatInput({ chatId }) {
       videoUrl: null, // Inicialmente nulo
     };
 
-    const llmMessageRef = await addDoc(
-      collection(
-        db,
-        "users",
-        session?.user?.email,
-        "chats",
-        chatId,
-        "messages"
-      ),
-      llmMessage
-    );
+    const llmMessageRef = await addDoc(collection(db, "users", session?.user?.email, "chats", chatId, "messages"), llmMessage);
 
     let videoUrl = "";
     if (numbers) {
       videoUrl = await sendNumbers(numbers, notification);
     }
 
-    await fetch("/api/askQuestion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: input,
-        chatId: chatId,
-        model: model,
-        session: session,
-      }),
-    })
-      .then(async (res) => {
+    const fetchApiAndUpdateMessage = async () => {
+      try {
+        const res = await fetch("/api/askQuestion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: input,
+            chatId: chatId,
+            model: model,
+            session: session,
+          }),
+        });
+
         const data = await res.json();
         toast.success("LLM success", { id: notification });
 
@@ -111,11 +88,14 @@ function ChatInput({ chatId }) {
           text: data.answer,
           videoUrl: videoUrl || null,
         });
-      })
-      .catch((error) => {
+      } catch (error) {
         toast.error("Error", { id: notification });
         console.error("Error:", error);
-      });
+      }
+    };
+
+    // Ejecutar la llamada a la API y actualizar el mensaje "Processing..."
+    fetchApiAndUpdateMessage();
   };
 
   const sendNumbers = async (numbers, notification) => {
@@ -130,6 +110,7 @@ function ChatInput({ chatId }) {
       },
       body: JSON.stringify({
         numbers: numbers.replace(/\s+/g, ""), // Ensure no spaces are included
+        prompt: prompt,
       }),
     })
       .then((res) => res.json())

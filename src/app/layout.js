@@ -11,10 +11,6 @@ export const metadata = {
   description: "A visual representation of sorting algorithms",
 };
 
-// Root layout for the application
-// Sidebar and children are displayed if the user is logged in
-// Otherwise, the login page is displayed
-
 export default async function RootLayout({ children }) {
   const session = await getServerSession(GET);
   return (
