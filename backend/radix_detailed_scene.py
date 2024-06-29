@@ -6,13 +6,10 @@ class RadixDetailedScene(Scene):
         super().__init__(**kwargs)
 
     def construct(self):
-        # Definir el arreglo de enteros a partir del parámetro pasado
         integer_array = self.integer_array
-
-        # Convertir los enteros a cadenas para mostrarlos en la tabla
         string_array = [str(num) for num in integer_array]
 
-        # Determinar la escala según el tamaño del arreglo y la longitud de los números
+        # Determine the scale factor
         array_length = len(integer_array)
         three_digit_count = sum(1 for num in integer_array if 100 <= num < 1000)
 
@@ -27,40 +24,36 @@ class RadixDetailedScene(Scene):
         else:
             scale_factor = 0.5
 
-        # Reducir la escala si más de la mitad de los números tienen tres dígitos
         if three_digit_count <= 3:
             scale_factor -= 0.1
         elif three_digit_count <= 5:
             scale_factor -= 0.2
         else:
-            scale_factor -= 0.3        
+            scale_factor -= 0.3
 
-        # Crear la tabla inicial en horizontal y ajustar la escala
+        # Create the initial table
         table = Table(
             [string_array],
             include_outer_lines=True
         ).scale(scale_factor)
 
-        # Animar la aparición de la tabla
+        table.shift(UP * 1.5)
+
         self.play(Create(table))
         self.wait(1)
 
-        # Radix Sort
         def counting_sort(arr, exp):
             n = len(arr)
             output = [0] * n
             count = [0] * 10
-            
-            # Contar ocurrencias de los dígitos
+
             for i in range(n):
                 index = (arr[i] // exp) % 10
                 count[index] += 1
 
-            # Cambiar count[i] para que contenga posiciones finales
             for i in range(1, 10):
                 count[i] += count[i - 1]
 
-            # Construir el arreglo ordenado
             i = n - 1
             while i >= 0:
                 index = (arr[i] // exp) % 10
@@ -68,60 +61,72 @@ class RadixDetailedScene(Scene):
                 count[index] -= 1
                 i -= 1
 
-            # Copiar el contenido de output a arr
             for i in range(n):
                 arr[i] = output[i]
 
         def radix_sort(arr):
-            # Encontrar el número máximo para saber el número de dígitos
             max1 = max(arr)
-
-            # Hacer counting sort para cada dígito
             exp = 1
             while max1 // exp > 0:
                 counting_sort(arr, exp)
                 exp *= 10
 
-        # Copiar el arreglo original para preservarlo
         sorted_array = integer_array[:]
-        
-        # Ordenar el arreglo usando Radix Sort
         radix_sort(sorted_array)
 
-        # Crear los buckets para la explicación detallada
-        buckets = VGroup(*[VGroup(Square(), Text(str(i))) for i in range(10)]).arrange(RIGHT, buff=1)
-        buckets.to_edge(DOWN)
+        buckets_labels = [str(i) for i in range(10)]
+        empty_buckets = [" " for _ in range(10)]
 
-        self.play(Create(buckets))
+        buckets_table = Table(
+            [buckets_labels, empty_buckets],
+            include_outer_lines=True
+        ).scale(scale_factor * 0.6)
+
+        buckets_table.next_to(table, DOWN, buff=1)
+
+        self.play(Create(buckets_table))
         self.wait(1)
 
-        # Animar los pasos del ordenamiento
+        def get_bucket_cell(digit, position):
+            return buckets_table.get_cell((2, digit + 1)).get_center() + DOWN * position * 0.3
+
         for i, exp in enumerate([1, 10, 100], start=1):
-            # Mostrar el conteo y reordenamiento para cada dígito
             intermediate_array = integer_array[:]
             counting_sort(intermediate_array, exp)
             string_intermediate_array = [str(num) for num in intermediate_array]
             new_table = Table([string_intermediate_array], include_outer_lines=True).scale(scale_factor)
 
-            # Crear un texto para indicar la etapa
-            stage_text = Text(f"Etapa {i}: Ordenando por el dígito de las {['unidades', 'decenas', 'centenas'][i-1]}").scale(0.5).to_edge(UP)
-            
-            self.play(Transform(table, new_table), FadeIn(stage_text))
+            stage_text = Text(f"Etapa {i}: Ordenando por el dígito de las {['unidades', 'decenas', 'centenas'][i-1]}").scale(0.5)
+            stage_text.to_edge(UP)
+
+            self.play(Transform(table, new_table.shift(UP * 1.5)), FadeIn(stage_text))
             self.wait(1)
             self.play(FadeOut(stage_text))
 
-            # Mover los números a sus respectivos buckets
+            bucket_positions = {i: 0 for i in range(10)}
+            bucket_mobjects = {i: VGroup() for i in range(10)}
             for num in intermediate_array:
                 digit = (num // exp) % 10
                 num_text = Text(str(num)).scale(0.5)
                 num_text.move_to(table.get_cell((1, intermediate_array.index(num) + 1)).get_center())
-                self.play(num_text.animate.move_to(buckets[digit][0].get_center()), run_time=0.5)
+                self.play(num_text.animate.move_to(get_bucket_cell(digit, bucket_positions[digit])), run_time=0.5)
+                bucket_positions[digit] += 1
+                bucket_mobjects[digit].add(num_text)
 
             self.wait(1)
 
-        # Mostrar la tabla final ordenada
+            for digit in range(10):
+                for num_text in bucket_mobjects[digit]:
+                    self.play(num_text.animate.move_to(table.get_cell((1, intermediate_array.index(int(num_text.text)) + 1)).get_center()), run_time=0.5)
+                bucket_mobjects[digit].remove(*bucket_mobjects[digit])
+
         sorted_string_array = [str(num) for num in sorted_array]
         final_table = Table([sorted_string_array], include_outer_lines=True).scale(scale_factor)
-        final_text = Text("Arreglo Final Ordenado").scale(0.5).to_edge(UP)
-        self.play(Transform(table, final_table), FadeIn(final_text))
+        final_text = Text("Arreglo Final Ordenado").scale(0.5)
+        final_text.to_edge(UP)
+        self.play(Transform(table, final_table.shift(UP * 1.5)), FadeIn(final_text))
         self.wait(2)
+
+integer_array = [10, 123, 456, 789, 4]
+scene = RadixDetailedScene(integer_array)
+scene.render()
