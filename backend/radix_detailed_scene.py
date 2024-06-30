@@ -74,21 +74,30 @@ class RadixDetailedScene(Scene):
         sorted_array = integer_array[:]
         radix_sort(sorted_array)
 
-        buckets_labels = [str(i) for i in range(10)]
-        empty_buckets = [" " for _ in range(10)]
+        # Create the buckets
+        bucket_height = 1.5
+        bucket_width = 0.5
+        bucket_spacing = 1
 
-        buckets_table = Table(
-            [buckets_labels, empty_buckets],
-            include_outer_lines=True
-        ).scale(scale_factor * 0.6)
+        buckets = VGroup()
+        bucket_labels = VGroup()
+        for i in range(10):
+            bucket = Rectangle(height=bucket_height, width=bucket_width)
+            bucket_label = Text(str(i)).scale(0.5).next_to(bucket, UP)
+            buckets.add(bucket)
+            bucket_labels.add(bucket_label)
 
-        buckets_table.next_to(table, DOWN, buff=1)
+        buckets.arrange(RIGHT, buff=bucket_spacing)
+        buckets.next_to(table, DOWN, buff=1)
+        bucket_labels.arrange(RIGHT, buff=bucket_spacing)
+        bucket_labels.next_to(buckets, UP)
 
-        self.play(Create(buckets_table))
+        self.play(Create(buckets), FadeIn(bucket_labels))
         self.wait(1)
 
-        def get_bucket_cell(digit, position):
-            return buckets_table.get_cell((2, digit + 1)).get_center() + DOWN * position * 0.3
+        def get_bucket_position(digit, position):
+            bucket = buckets[digit]
+            return bucket.get_top() + DOWN * (position + 0.5) * 0.3
 
         for i, exp in enumerate([1, 10, 100], start=1):
             intermediate_array = integer_array[:]
@@ -109,7 +118,7 @@ class RadixDetailedScene(Scene):
                 digit = (num // exp) % 10
                 num_text = Text(str(num)).scale(0.5)
                 num_text.move_to(table.get_cell((1, intermediate_array.index(num) + 1)).get_center())
-                self.play(num_text.animate.move_to(get_bucket_cell(digit, bucket_positions[digit])), run_time=0.5)
+                self.play(num_text.animate.move_to(get_bucket_position(digit, bucket_positions[digit])), run_time=0.5)
                 bucket_positions[digit] += 1
                 bucket_mobjects[digit].add(num_text)
 
