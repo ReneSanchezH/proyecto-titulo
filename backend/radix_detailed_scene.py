@@ -77,22 +77,27 @@ class RadixDetailedScene(Scene):
         # Create the buckets
         bucket_height = 1.5
         bucket_width = 0.5
-        bucket_spacing = 1
+        bucket_spacing = 1.0  # Ajusta este valor según sea necesario
 
         buckets = VGroup()
-        bucket_labels = VGroup()
         for i in range(10):
             bucket = Rectangle(height=bucket_height, width=bucket_width)
-            bucket_label = Text(str(i)).scale(0.5).next_to(bucket, UP)
             buckets.add(bucket)
-            bucket_labels.add(bucket_label)
 
         buckets.arrange(RIGHT, buff=bucket_spacing)
         buckets.next_to(table, DOWN, buff=1)
-        bucket_labels.arrange(RIGHT, buff=bucket_spacing)
-        bucket_labels.next_to(buckets, UP)
 
-        self.play(Create(buckets), FadeIn(bucket_labels))
+        self.add(buckets)  # Add buckets without animation
+        self.wait(1)
+
+        # Create the labels manually and adjust spacing
+        labels = VGroup()
+        for i in range(10):
+            label = Text(str(i)).scale(0.5)
+            label.next_to(buckets[i], UP, buff=0.1)
+            labels.add(label)
+
+        self.add(labels)  # Add labels without animation
         self.wait(1)
 
         def get_bucket_position(digit, position):
