@@ -102,10 +102,10 @@ class RadixDetailedScene(Scene):
                 num = int(num_text.text)
                 digit = (num // exp) % 10
 
-                # Animate number shrinking and moving to bucket
+                # Animate number shrinking and moving to bucket with padding
                 self.play(
                     num_text.animate.scale(0.6).move_to(
-                        buckets[digit].get_top() + DOWN * (bucket_positions[digit] + 0.5) * 0.3
+                        buckets[digit].get_top() + DOWN * (bucket_positions[digit] + 0.5) * 0.3 + DOWN * 0.1  # Adding padding
                     ),
                     run_time=0.5
                 )
