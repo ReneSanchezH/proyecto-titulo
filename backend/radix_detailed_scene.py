@@ -98,25 +98,30 @@ class RadixDetailedScene(Scene):
             self.wait(1)
 
             bucket_positions = {i: 0 for i in range(10)}
-            for idx, num_text in enumerate(num_texts):
-                num = int(num_text.text)
-                digit = (num // exp) % 10
+            for digit in range(10):
+                bucket_rect = buckets[digit]
+                bucket_rect.set_color(BLUE)
+                self.wait(0.5)  # Short wait to highlight the bucket
 
-                # Animate number shrinking and moving to bucket with padding
-                self.play(
-                    num_text.animate.scale(0.6).move_to(
-                        buckets[digit].get_top() + DOWN * (bucket_positions[digit] + 0.5) * 0.3 + DOWN * 0.1  # Adding padding
-                    ),
-                    run_time=0.5
-                )
-                bucket_positions[digit] += 1
+                for idx, num_text in enumerate(num_texts):
+                    num = int(num_text.text)
+                    current_digit = (num // exp) % 10
+                    if current_digit == digit:
+                        self.play(
+                            num_text.animate.scale(0.6).move_to(
+                                bucket_rect.get_top() + DOWN * (bucket_positions[digit] + 0.5) * 0.3 + DOWN * 0.1
+                            ),
+                            run_time=0.5
+                        )
+                        bucket_positions[digit] += 1
+                        self.wait(0.2)
+
+                bucket_rect.set_color(WHITE)
 
             self.wait(1)
 
             for idx, num in enumerate(steps[i]):
                 num_text = next(t for t in num_texts if int(t.text) == num)
-
-                # Animate number resizing back to original and moving to square
                 self.play(
                     num_text.animate.scale(1 / 0.6).move_to(squares[idx].get_center()), run_time=0.5
                 )
