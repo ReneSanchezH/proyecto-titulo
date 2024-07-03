@@ -9,6 +9,21 @@ class RadixDetailedScene(Scene):
         integer_array = self.integer_array
         array_length = len(integer_array)
 
+        # Título Inicial
+        title = Text("Radix Sort").scale(1).to_edge(UP)
+        self.play(Write(title))
+        self.wait(2)
+
+        # Texto Introductorio
+        intro_text = Text(
+            "Radix Sort es un algoritmo de ordenamiento no comparativo\n"
+            "que ordena los números procesando dígitos individuales.\n"
+            "En este ejemplo, veremos cómo funciona paso a paso."
+        ).scale(0.6).next_to(title, DOWN, buff=0.5)
+        self.play(FadeIn(intro_text))
+        self.wait(3)
+        self.play(FadeOut(intro_text))
+
         # Determine the scale factor based on array length
         if array_length <= 5:
             scale_factor = 1.2
