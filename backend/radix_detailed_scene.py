@@ -13,6 +13,7 @@ class RadixDetailedScene(Scene):
         title = Text("Radix Sort").scale(1).to_edge(UP)
         self.play(Write(title))
         self.wait(2)
+        self.play(FadeOut(title))
 
         # Texto Introductorio
         intro_text = Text(

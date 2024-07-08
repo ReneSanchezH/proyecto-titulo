@@ -1,5 +1,4 @@
 from manim import *
-import argparse
 
 class CountingSortScene(Scene):
     def __init__(self, integer_array, **kwargs):
@@ -9,6 +8,11 @@ class CountingSortScene(Scene):
     def construct(self):
         integer_array = self.integer_array
         array_length = len(integer_array)
+
+        # Título Inicial
+        title = Text("Counting Sort").scale(1).to_edge(UP)
+        self.play(Write(title))
+        self.wait(2)
 
         # Determine the scale factor based on array length
         if array_length <= 5:
@@ -22,7 +26,7 @@ class CountingSortScene(Scene):
         else:
             scale_factor = 0.5
 
-        # Create the initial empty squares
+        # Create the initial squares representing the array
         squares = VGroup(*[Square(side_length=1).scale(scale_factor) for _ in integer_array])
         squares.arrange(RIGHT, buff=0)
         squares.shift(UP * 1.5)
@@ -38,90 +42,101 @@ class CountingSortScene(Scene):
         self.play(*[FadeIn(num_text) for num_text in num_texts])
         self.wait(1)
 
-        # Create the count array (buckets for counting sort)
-        max_num = max(integer_array)
-        count_array_length = max_num + 1
-        count_squares = VGroup(*[Square(side_length=1).scale(0.7) for _ in range(count_array_length)])
-        count_squares.arrange(RIGHT, buff=0.1)
-        count_squares.shift(DOWN * 1.5)
+        # Create the buckets
+        bucket_height = 1.5
+        bucket_width = 0.7
+        bucket_spacing = 0.6
+        buckets = VGroup(*[Rectangle(height=bucket_height, width=bucket_width) for _ in range(10)])
+        buckets.arrange(RIGHT, buff=bucket_spacing)
+        buckets.next_to(squares, DOWN, buff=1)
 
-        self.play(Create(count_squares))
+        self.add(buckets)  # Add buckets without animation
         self.wait(1)
 
-        # Create the count numbers and place them in the count squares
-        count_texts = VGroup(*[Text('0').scale(0.5) for _ in range(count_array_length)])
-        for idx, count_text in enumerate(count_texts):
-            count_text.move_to(count_squares[idx].get_center())
-
-        self.play(*[FadeIn(count_text) for count_text in count_texts])
+        # Create the labels manually and adjust spacing
+        labels = VGroup(*[Text(str(i)).scale(0.5).next_to(buckets[i], UP, buff=0.1) for i in range(10)])
+        self.add(labels)  # Add labels without animation
         self.wait(1)
 
-        # Create labels for the count squares
-        count_labels = VGroup(*[Text(str(i)).scale(0.5).next_to(count_squares[i], UP, buff=0.1) for i in range(count_array_length)])
-        self.play(*[FadeIn(label) for label in count_labels])
+        # Create the count array below the buckets
+        count_squares = VGroup(*[Square(side_length=1).scale(0.7) for _ in range(10)])
+        count_squares.arrange(RIGHT, buff=bucket_spacing)
+        count_squares.next_to(buckets, DOWN, buff=1)
+
+        self.add(count_squares)
         self.wait(1)
 
-        # Step 1: Count the occurrences of each number
+        count_texts = VGroup(*[Text("0").scale(0.5).move_to(count_squares[i].get_center()) for i in range(10)])
+        self.add(count_texts)
+        self.wait(1)
+
+        # Counting Sort Algorithm Visualization
+        def counting_sort(arr):
+            n = len(arr)
+            output = [0] * n
+            count = [0] * 10
+
+            for i in range(n):
+                index = arr[i]
+                count[index] += 1
+
+            for i in range(1, 10):
+                count[i] += count[i - 1]
+
+            for i in range(n-1, -1, -1):
+                index = arr[i]
+                output[count[index] - 1] = arr[i]
+                count[index] -= 1
+
+            for i in range(n):
+                arr[i] = output[i]
+
+        steps = []
+
+        def update_count_array(count):
+            for i, c in enumerate(count):
+                count_texts[i].become(Text(str(c)).scale(0.5).move_to(count_squares[i].get_center()))
+
+        count = [0] * 10
         for num in integer_array:
-            count_text = count_texts[num]
-            self.play(Indicate(num_texts[integer_array.index(num)]), run_time=0.5)
-            new_count = int(count_text.text) + 1
-            count_text.set_text(str(new_count))
-            self.play(Transform(count_text, count_text.copy().move_to(count_squares[num].get_center())), run_time=0.5)
+            count[num] += 1
+            steps.append(count[:])
+            update_count_array(count)
+            self.wait(1)
 
+        for i in range(1, 10):
+            count[i] += count[i - 1]
+            steps.append(count[:])
+            update_count_array(count)
+            self.wait(1)
+
+        output = [0] * array_length
+        for num in reversed(integer_array):
+            output[count[num] - 1] = num
+            count[num] -= 1
+            steps.append(count[:])
+            update_count_array(count)
+            self.wait(1)
+
+        sorted_squares = VGroup(*[Square(side_length=1).scale(scale_factor) for _ in output])
+        sorted_squares.arrange(RIGHT, buff=0)
+        sorted_squares.next_to(count_squares, DOWN, buff=1)
+
+        self.play(Create(sorted_squares))
         self.wait(1)
 
-        # Step 2: Modify the count array by adding the previous counts
-        for i in range(1, count_array_length):
-            prev_count = int(count_texts[i-1].text)
-            current_count = int(count_texts[i].text)
-            new_count = prev_count + current_count
-            count_texts[i].set_text(str(new_count))
-            self.play(Transform(count_texts[i], count_texts[i].copy().move_to(count_squares[i].get_center())), run_time=0.5)
+        sorted_texts = VGroup(*[Text(str(num)).scale(scale_factor * 0.8) for num in output])
+        for idx, num_text in enumerate(sorted_texts):
+            num_text.move_to(sorted_squares[idx].get_center())
 
+        self.play(*[FadeIn(num_text) for num_text in sorted_texts])
         self.wait(1)
 
-        # Step 3: Place numbers into their correct positions
-        output_array = [None] * array_length
-        num_text_positions = {num_text: idx for idx, num_text in enumerate(num_texts)}
-
-        for num_text in reversed(num_texts):
-            num = int(num_text.text)
-            count = int(count_texts[num].text)
-            position = count - 1
-            output_array[position] = num
-            count_texts[num].set_text(str(count - 1))
-            self.play(
-                num_text.animate.move_to(squares[position].get_center()),
-                Transform(count_texts[num], count_texts[num].copy().move_to(count_squares[num].get_center())),
-                run_time=0.5
-            )
-
-        self.wait(1)
-
-        # Final step: Display the sorted array
         final_text = Text("Arreglo Final Ordenado").scale(0.5)
         final_text.to_edge(UP)
         self.play(FadeIn(final_text))
         self.wait(2)
 
-def main():
-    parser = argparse.ArgumentParser(description="Run sorting scenes with Manim.")
-    parser.add_argument('--detailed', action='store_true', help="Generate detailed Radix Sort video.")
-    parser.add_argument('--counting', action='store_true', help="Generate Counting Sort video.")
-    parser.add_argument('--numbers', type=str, default="170,45,75,90,802,24,2,66", help="Comma-separated list of numbers to sort.")
-    
-    args = parser.parse_args()
-    numbers = [int(num) for num in args.numbers.split(',')]
-    
-    if args.counting:
-        scene = CountingSortScene(numbers)
-    elif args.detailed:
-        scene = RadixDetailedScene(numbers)
-    else:
-        scene = RadixSortScene(numbers)
-    
-    scene.render()
-
-if __name__ == "__main__":
-    main()
+integer_array = [3, 6, 4, 1, 3, 4, 1, 4]
+scene = CountingSortScene(integer_array)
+scene.render()
