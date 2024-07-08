@@ -2,7 +2,7 @@ from manim import *
 from radix_sort_scene import RadixSortScene
 from radix_detailed_scene import RadixDetailedScene
 from counting_sort_scene import CountingSortScene
-from introduction_scene import IntroductionScene
+from introduction_scene import IntroductionScene  # Importar la escena de introducción
 import argparse
 import os
 import glob
@@ -19,7 +19,7 @@ class CountingSortSceneWrapper(CountingSortScene):
     def __init__(self, integer_array, **kwargs):
         super().__init__(integer_array, **kwargs)
 
-class IntroductionSceneWrapper(IntroductionScene):
+class IntroductionSceneWrapper(IntroductionScene):  # Crear un wrapper para la escena de introducción
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

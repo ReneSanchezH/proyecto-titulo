@@ -2,6 +2,7 @@
 
 # local partial manim files
 backend/videos/
+backend/media/
 
 # dependencies
 /node_modules

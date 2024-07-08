@@ -3,6 +3,7 @@ import os
 from manim import config
 from radix_sort_scene import RadixSortScene
 from radix_detailed_scene import RadixDetailedScene  # Importar escena detallada
+from introduction_scene import IntroductionScene  # Importar escena de introducción
 from flask_cors import CORS
 import nltk
 from nltk.tokenize import word_tokenize
@@ -22,9 +23,22 @@ except LookupError:
     nltk.download('punkt')
 
 def should_generate_detailed_video(prompt):
-    detailed_keywords = ["detallado", "detalles", "explicaciones", "explicación"]
+    detailed_keywords = [
+        "detallado", "detalles", "explicaciones", "explicación", "pormenorizado", "analítico", 
+        "exhaustivo", "minucioso", "paso a paso", "detalladamente", "explicación completa", 
+        "en profundidad", "descripción detallada"
+    ]
     tokens = word_tokenize(prompt.lower())
     return any(word in tokens for word in detailed_keywords)
+
+def should_generate_introduction_video(prompt):
+    intro_keywords = [
+        "LSD", "MSD", "comparación", "buckets", "introducción", "básico", "fundamentos", 
+        "conceptos básicos", "explicación simple", "tutorial", "principios", "introducción a", 
+        "qué es", "definición"
+    ]
+    tokens = word_tokenize(prompt.lower())
+    return any(word.lower() in tokens for word in intro_keywords)
 
 @app.route('/generate-video', methods=['POST'])
 def generate_video():
@@ -48,7 +62,14 @@ def generate_video():
         config.media_dir = output_dir
         config.output_file = output_file
 
-        if should_generate_detailed_video(prompt):
+        if should_generate_introduction_video(prompt):
+            class IntroductionSceneWrapper(IntroductionScene):
+                def __init__(self, **kwargs):
+                    super().__init__(**kwargs)
+            
+            scene = IntroductionSceneWrapper()
+            output_file = os.path.join(output_dir, 'introduction.mp4')
+        elif should_generate_detailed_video(prompt):
             class RadixDetailedSceneWrapper(RadixDetailedScene):
                 def __init__(self, **kwargs):
                     super().__init__(numbers, **kwargs)
@@ -63,7 +84,10 @@ def generate_video():
 
         scene.render()
         
-        video_url = f'/videos/{formatted_string}.mp4'
+        if should_generate_introduction_video(prompt):
+            video_url = '/videos/introduction.mp4'
+        else:
+            video_url = f'/videos/{formatted_string}.mp4'
         return jsonify({"message": "Video generated successfully!", "video_url": video_url})
 
     except Exception as e:
