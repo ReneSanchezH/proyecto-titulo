@@ -45,6 +45,18 @@ class RadixSortScene(Scene):
         self.play(Create(table))
         self.wait(1)
 
+        # Crear buckets
+        bucket_labels = VGroup(*[Text(str(i)).scale(0.6) for i in range(10)])
+        buckets = VGroup(*[Square().scale(0.7) for _ in range(10)])
+        bucket_group = VGroup()
+
+        for label, bucket in zip(bucket_labels, buckets):
+            bucket_group.add(VGroup(label, bucket).arrange(DOWN, buff=0.1))
+
+        bucket_group.arrange(RIGHT, buff=0.5).shift(DOWN * 2)
+        self.play(FadeIn(bucket_group))
+        self.wait(2)
+
         # Radix Sort
         def counting_sort(arr, exp):
             n = len(arr)
@@ -109,3 +121,4 @@ class RadixSortScene(Scene):
         final_text = Text("Arreglo Final Ordenado").scale(0.5).to_edge(UP)
         self.play(Transform(table, final_table), FadeIn(final_text))
         self.wait(2)
+

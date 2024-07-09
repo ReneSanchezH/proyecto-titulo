@@ -27,6 +27,9 @@ class IntroductionScene(Scene):
         # Esperar un poco antes de mostrar el nuevo título
         self.wait(0.5)
 
+        # Explicación de los "Buckets"
+        
+
         # Variedades del Radix Sort
         varieties_title = Text("Variedades del Radix Sort\n").scale(0.7).to_edge(UP)
         lsd_text = Text(
@@ -44,3 +47,4 @@ class IntroductionScene(Scene):
         self.play(FadeIn(lsd_text), FadeIn(msd_text))
         self.wait(4)
         self.play(FadeOut(varieties_title), FadeOut(lsd_text), FadeOut(msd_text))
+

@@ -2,7 +2,8 @@ from manim import *
 from radix_sort_scene import RadixSortScene
 from radix_detailed_scene import RadixDetailedScene
 from counting_sort_scene import CountingSortScene
-from introduction_scene import IntroductionScene  # Importar la escena de introducción
+from introduction_scene import IntroductionScene
+from bucket_scene import BucketScene  # Import the new BucketScene
 import argparse
 import os
 import glob
@@ -19,7 +20,7 @@ class CountingSortSceneWrapper(CountingSortScene):
     def __init__(self, integer_array, **kwargs):
         super().__init__(integer_array, **kwargs)
 
-class IntroductionSceneWrapper(IntroductionScene):  # Crear un wrapper para la escena de introducción
+class IntroductionSceneWrapper(IntroductionScene):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -28,12 +29,16 @@ def main():
     parser.add_argument('--detailed', action='store_true', help="Generate detailed Radix Sort video.")
     parser.add_argument('--counting', action='store_true', help="Generate Counting Sort video.")
     parser.add_argument('--introduction', action='store_true', help="Generate Introduction video.")
+    parser.add_argument('--bucket', action='store_true', help="Generate Bucket Explanation video.")
     parser.add_argument('--numbers', type=str, default="170,45,75,90,802,24,2,66", help="Comma-separated list of numbers to sort.")
     
     args = parser.parse_args()
     numbers = [int(num) for num in args.numbers.split(',')]
     
-    if args.introduction:
+    if args.bucket:
+        scene = BucketScene()
+        output_file = "BucketScene.mp4"
+    elif args.introduction:
         scene = IntroductionSceneWrapper()
         output_file = "IntroductionScene.mp4"
     elif args.counting:
