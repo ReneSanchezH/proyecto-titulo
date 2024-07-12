@@ -17,6 +17,9 @@ class CountingSort(Scene):
         # Paso 3 - Iteraciones
         self.paso3_iteraciones()
 
+        # Paso 4
+        self.paso4()
+
     def introduccion(self):
         # Título Inicial
         title = Text("Counting Sort\n").scale(1).to_edge(UP)
@@ -120,15 +123,45 @@ class CountingSort(Scene):
         count_array_mob.shift(DOWN * 1.5)  # Mover hacia abajo
         self.add(count_array_mob)
 
-        # Crear el countArray de texto separado
-        count_text_array = [Text(str(0)).scale(0.5).move_to(count_array_mob[1][i][1].get_center()) for i in range(len(count_array))]
-        count_text_array_mob = VGroup(*count_text_array)
-        self.add(count_text_array_mob)
-
         self.wait(2)
 
         # Mostrar las iteraciones del llenado del countArray
-        self.animate_count_array(input_array, count_text_array, input_array_mob)
+        self.animate_count_array(input_array, count_array, count_array_mob, input_array_mob)
+
+    
+    def paso4(self):
+        self.clear()
+        # Texto del paso 4
+        step4_text = Text(
+        "Paso 4: Calcular sumas acumuladas en countArray.\n"
+        "Realizamos countArray[i] = countArray[i-1] + countArray[i]."
+        ).scale(0.7).to_edge(LEFT).shift(UP)
+        self.add(step4_text)
+        self.wait(3)
+        self.remove(step4_text)
+
+        # Mostrar el countArray inicial
+        initial_count_array = [2, 0, 2, 3, 0, 1]
+        count_array_mob = self.create_count_array_mobject(initial_count_array, label="countArray", scale=0.5)
+        count_array_mob.shift(UP * 1.5)  # Mover hacia arriba
+        self.add(count_array_mob)
+
+        self.wait(2)
+
+        # Calcular y mostrar las sumas acumuladas
+        cumulative_count_array = initial_count_array[:]
+        for i in range(1, len(cumulative_count_array)):
+            cumulative_count_array[i] += cumulative_count_array[i - 1]
+
+        cumulative_count_array_mob = self.create_count_array_mobject(cumulative_count_array, label="countArray", scale=0.5)
+        cumulative_count_array_mob.shift(UP * 1.5)  # Mover hacia arriba
+        self.play(Transform(count_array_mob, cumulative_count_array_mob))
+
+        self.wait(3)
+
+
+
+
 
     def create_array_mobject(self, array, label="", scale=1):
         array_mob = VGroup()
@@ -169,9 +202,8 @@ class CountingSort(Scene):
 
         return count_array_mob
 
-    def animate_count_array(self, input_array, count_text_array, input_array_mob):
-        # Iterar a través del input_array y actualizar count_text_array
-        count_array = [0] * len(count_text_array)
+    def animate_count_array(self, input_array, count_array, count_array_mob, input_array_mob):
+        # Iterar a través del input_array y actualizar count_array
         for i, val in enumerate(input_array):
             self.wait(0.5)
             count_array[val] += 1
@@ -180,12 +212,10 @@ class CountingSort(Scene):
             input_square = input_array_mob[1][i][0]
             input_square.set_fill(YELLOW, opacity=0.5)
 
-            # Eliminar el texto anterior y añadir el nuevo texto
-            old_text = count_text_array[val]
-            new_text = Text(str(count_array[val])).scale(0.5).move_to(old_text.get_center())
-            self.remove(old_text)
-            count_text_array[val] = new_text
-            self.add(new_text)
+            # Actualizar el countArray completo
+            updated_count_array_mob = self.create_count_array_mobject(count_array, label="countArray", scale=0.5)
+            updated_count_array_mob.shift(DOWN * 1.5)  # Mover hacia abajo como el original
+            self.play(Transform(count_array_mob, updated_count_array_mob))
 
             self.wait(0.5)
             input_square.set_fill(WHITE, opacity=0)

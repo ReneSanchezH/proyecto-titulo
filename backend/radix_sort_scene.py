@@ -1,190 +1,124 @@
 from manim import *
 
-class CountingSort(Scene):
+class RadixSortScene(Scene):
+    def __init__(self, integer_array, **kwargs):
+        self.integer_array = integer_array
+        super().__init__(**kwargs)
+
     def construct(self):
-        # Introducción
-        self.introduccion()
+        # Definir el arreglo de enteros a partir del parámetro pasado
+        integer_array = self.integer_array
 
-        # Paso 0
-        self.paso0()
+        # Convertir los enteros a cadenas para mostrarlos en la tabla
+        string_array = [str(num) for num in integer_array]
 
-        # Paso 1
-        self.paso1()
+        # Determinar la escala según el tamaño del arreglo y la longitud de los números
+        array_length = len(integer_array)
+        three_digit_count = sum(1 for num in integer_array if 100 <= num < 1000)
 
-        # Paso 2
-        self.paso2()
+        if array_length <= 5:
+            scale_factor = 1.2
+        elif array_length <= 7:
+            scale_factor = 1.0
+        elif array_length <= 9:
+            scale_factor = 0.8
+        elif array_length <= 10:
+            scale_factor = 0.7
+        else:
+            scale_factor = 0.5
 
-        # Paso 3 - Iteraciones
-        self.paso3_iteraciones()
+        # Reducir la escala si más de la mitad de los números tienen tres dígitos
+        if three_digit_count <= 3:
+            scale_factor -= 0.1
+        elif three_digit_count <= 5:
+            scale_factor -= 0.2
+        else:
+            scale_factor -= 0.3        
 
-    def introduccion(self):
-        # Título Inicial
-        title = Text("Counting Sort\n").scale(1).to_edge(UP)
-        self.add(title)
+        # Crear la tabla inicial en horizontal y ajustar la escala
+        table = Table(
+            [string_array],
+            include_outer_lines=True
+        ).scale(scale_factor)
+
+        # Animar la aparición de la tabla
+        self.play(Create(table))
         self.wait(1)
 
-        # Introducción
-        intro = Text(
-            "Counting Sort ordena elementos sin comparaciones.\n"
-            "Es eficiente con un rango limitado de valores.\n\n"
-            "Cuenta la frecuencia de cada elemento y usa esa\n"
-            "información para ordenar los elementos.\n"
-        ).scale(0.7).next_to(title, DOWN, buff=0.5)
-        self.add(intro)
-        self.wait(6)
-        self.remove(intro)
+        # Crear buckets
+        bucket_labels = VGroup(*[Text(str(i)).scale(0.6) for i in range(10)])
+        buckets = VGroup(*[Square().scale(0.7) for _ in range(10)])
+        bucket_group = VGroup()
 
-    def paso0(self):
-        self.clear()
-        # Texto del paso 0
-        step0_text = Text(
-            "Vamos a ordenar el siguiente arreglo:"
-        ).scale(0.7).to_edge(LEFT).shift(UP)
-        self.add(step0_text)
-        self.wait(1)
+        for label, bucket in zip(bucket_labels, buckets):
+            bucket_group.add(VGroup(label, bucket).arrange(DOWN, buff=0.1))
 
-        # Crear y mostrar el array de entrada
-        input_array = [2, 5, 3, 0, 2, 3, 0, 3]
-        input_array_mob = self.create_array_mobject(input_array, label="inputArray", scale=0.5)
-        self.add(input_array_mob)
-        self.input_array_mob = input_array_mob  # Guardar la referencia para usarla más tarde
-        self.wait(6)
-        self.remove(step0_text)
-
-    def paso1(self):
-        self.clear()
-        # Texto del paso 1
-        step1_text = Text(
-            "Paso 1: Encontrar el elemento máximo."
-        ).scale(0.7).to_edge(LEFT).shift(UP)
-        self.add(step1_text)
-        self.wait(1)
-
-        # Crear y mostrar el array de entrada
-        input_array = [2, 5, 3, 0, 2, 3, 0, 3]
-        input_array_mob = self.create_array_mobject(input_array, label="inputArray", scale=0.5)
-        self.add(input_array_mob)
-        self.input_array_mob = input_array_mob  # Guardar la referencia para usarla más tarde
+        bucket_group.arrange(RIGHT, buff=0.5).shift(DOWN * 2)
+        self.play(FadeIn(bucket_group))
         self.wait(2)
 
-        # Resaltar el número máximo
-        max_value = max(input_array)
-        max_index = input_array.index(max_value)
-        max_square = input_array_mob[1][max_index][0]
-        max_square.set_fill(BLUE, opacity=0.5)
-
-        # Mostrar el valor máximo
-        max_label = Text(f"max\n{max_value}", color=GREEN).scale(0.8).next_to(input_array_mob, RIGHT, buff=0.5)
-        self.add(max_label)
-
-        self.wait(3)
-        self.remove(max_label)
-        max_square.set_fill(WHITE, opacity=0)  # Resetear el color del máximo valor
-
-    def paso2(self):
-        self.clear()
-        # Texto del paso 2
-        step2_text = Text(
-            "Paso 2: Inicializar countArray[] con ceros."
-        ).scale(0.7).to_edge(LEFT).shift(UP)
-        self.add(step2_text)
-        self.wait(4)
-        self.remove(step2_text)
-
-        # Crear y mostrar el countArray
-        count_array = [0, 0, 0, 0, 0, 0]
-        count_array_mob = self.create_count_array_mobject(count_array, label="countArray", scale=0.7)
-        self.add(count_array_mob)
-        self.count_array_mob = count_array_mob  # Guardar la referencia para usarla más tarde
-        self.wait(3)
-
-    def paso3_iteraciones(self):
-        self.clear()
-        # Texto del paso 3
-        step3_text = Text(
-            "Paso 3: Registrar la frecuencia de cada elemento en countArray."
-        ).scale(0.7).to_edge(LEFT).shift(UP)
-        self.add(step3_text)
-        self.wait(3)
-        self.remove(step3_text)
-
-        # Mostrar el array de entrada
-        input_array = [2, 5, 3, 0, 2, 3, 0, 3]
-        input_array_mob = self.create_array_mobject(input_array, label="inputArray", scale=0.5)
-        input_array_mob.shift(UP * 1.5)  # Mover hacia arriba
-        self.add(input_array_mob)
-
-        # Crear y mostrar el countArray vacío
-        count_array = [0, 0, 0, 0, 0, 0]
-        count_array_mob = self.create_count_array_mobject(count_array, label="countArray", scale=0.5)
-        count_array_mob.shift(DOWN * 1.5)  # Mover hacia abajo
-        self.add(count_array_mob)
-
-        self.wait(2)
-
-        # Mostrar las iteraciones del llenado del countArray
-        self.animate_count_array(input_array, count_array, count_array_mob, input_array_mob)
-
-    def create_array_mobject(self, array, label="", scale=1):
-        array_mob = VGroup()
-        
-        for i, val in enumerate(array):
-            square = Square().scale(scale)
-            square.set_fill(WHITE, opacity=0)
-            square_label = Text(str(val)).scale(scale).move_to(square.get_center())
-            square_group = VGroup(square, square_label)
-            array_mob.add(square_group)
-        
-        array_mob.arrange(RIGHT, buff=0.1)
-
-        if label:
-            array_label = Text(label).scale(scale).next_to(array_mob, LEFT, buff=0.5)
-            array_mob = VGroup(array_label, array_mob).arrange(RIGHT, buff=0.5)
-
-        return array_mob
-
-    def create_count_array_mobject(self, array, label="", scale=1):
-        count_array_mob = VGroup()
-        
-        for i, val in enumerate(array):
-            square = Square().scale(scale)
-            square.set_fill(WHITE, opacity=0)
-            square_label = Text(str(val)).scale(scale).move_to(square.get_center())
-            square_group = VGroup(square, square_label)
+        # Radix Sort
+        def counting_sort(arr, exp):
+            n = len(arr)
+            output = [0] * n
+            count = [0] * 10
             
-            # Etiquetas encima del array, colocadas más arriba
-            index_label = Text(str(i)).scale(scale * 1.2).move_to(square.get_center() + UP * 0.9)
-            count_array_mob.add(VGroup(index_label, square_group))
+            # Contar ocurrencias de los dígitos
+            for i in range(n):
+                index = (arr[i] // exp) % 10
+                count[index] += 1
+
+            # Cambiar count[i] para que contenga posiciones finales
+            for i in range(1, 10):
+                count[i] += count[i - 1]
+
+            # Construir el arreglo ordenado
+            i = n - 1
+            while i >= 0:
+                index = (arr[i] // exp) % 10
+                output[count[index] - 1] = arr[i]
+                count[index] -= 1
+                i -= 1
+
+            # Copiar el contenido de output a arr
+            for i in range(n):
+                arr[i] = output[i]
+
+        def radix_sort(arr):
+            # Encontrar el número máximo para saber el número de dígitos
+            max1 = max(arr)
+
+            # Hacer counting sort para cada dígito
+            exp = 1
+            while max1 // exp > 0:
+                counting_sort(arr, exp)
+                exp *= 10
+
+        # Copiar el arreglo original para preservarlo
+        sorted_array = integer_array[:]
         
-        count_array_mob.arrange(RIGHT, buff=0.1)
+        # Ordenar el arreglo usando Radix Sort
+        radix_sort(sorted_array)
 
-        if label:
-            array_label = Text(label).scale(scale).next_to(count_array_mob, LEFT, buff=0.5)
-            count_array_mob = VGroup(array_label, count_array_mob).arrange(RIGHT, buff=0.5)
+        # Animar los pasos del ordenamiento
+        for i, exp in enumerate([1, 10, 100], start=1):
+            # Mostrar el conteo y reordenamiento para cada dígito
+            intermediate_array = integer_array[:]
+            counting_sort(intermediate_array, exp)
+            string_intermediate_array = [str(num) for num in intermediate_array]
+            new_table = Table([string_intermediate_array], include_outer_lines=True).scale(scale_factor)
 
-        return count_array_mob
+            # Crear un texto para indicar la etapa
+            stage_text = Text(f"Etapa {i}: Ordenando por el dígito de las {['unidades', 'decenas', 'centenas'][i-1]}").scale(0.5).to_edge(UP)
+            
+            self.play(Transform(table, new_table), FadeIn(stage_text))
+            self.wait(1)
+            self.play(FadeOut(stage_text))
 
-    def animate_count_array(self, input_array, count_array, count_array_mob, input_array_mob):
-        # Iterar a través del input_array y actualizar count_array
-        for i, val in enumerate(input_array):
-            self.wait(0.5)
-            count_array[val] += 1
+        # Mostrar la tabla final ordenada
+        sorted_string_array = [str(num) for num in sorted_array]
+        final_table = Table([sorted_string_array], include_outer_lines=True).scale(scale_factor)
+        final_text = Text("Arreglo Final Ordenado").scale(0.5).to_edge(UP)
+        self.play(Transform(table, final_table), FadeIn(final_text))
+        self.wait(2)
 
-            # Resaltar la celda actual en input_array
-            input_square = input_array_mob[1][i][0]
-            input_square.set_fill(YELLOW, opacity=0.5)
-
-            # Actualizar el countArray completo
-            updated_count_array_mob = self.create_count_array_mobject(count_array, label="countArray", scale=0.5)
-            updated_count_array_mob.shift(DOWN * 1.5)  # Mover hacia abajo como el original
-            self.play(Transform(count_array_mob, updated_count_array_mob))
-
-            self.wait(0.5)
-            input_square.set_fill(WHITE, opacity=0)
-
-        self.wait(3)
-
-# Ejecuta la escena
-if __name__ == "__main__":
-    scene = CountingSort()
-    scene.render()
