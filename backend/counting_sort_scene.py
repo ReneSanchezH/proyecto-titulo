@@ -120,10 +120,15 @@ class CountingSort(Scene):
         count_array_mob.shift(DOWN * 1.5)  # Mover hacia abajo
         self.add(count_array_mob)
 
+        # Crear el countArray de texto separado
+        count_text_array = [Text(str(0)).scale(0.5).move_to(count_array_mob[1][i][1].get_center()) for i in range(len(count_array))]
+        count_text_array_mob = VGroup(*count_text_array)
+        self.add(count_text_array_mob)
+
         self.wait(2)
 
         # Mostrar las iteraciones del llenado del countArray
-        self.animate_count_array(input_array, count_array_mob, input_array_mob)
+        self.animate_count_array(input_array, count_text_array, input_array_mob)
 
     def create_array_mobject(self, array, label="", scale=1):
         array_mob = VGroup()
@@ -164,26 +169,26 @@ class CountingSort(Scene):
 
         return count_array_mob
 
-    def animate_count_array(self, input_array, count_array_mob, input_array_mob):
-        # Iterar a través del input_array y actualizar count_array_mob
-        count_array = [0] * len(count_array_mob[1])
+    def animate_count_array(self, input_array, count_text_array, input_array_mob):
+        # Iterar a través del input_array y actualizar count_text_array
+        count_array = [0] * len(count_text_array)
         for i, val in enumerate(input_array):
             self.wait(0.5)
             count_array[val] += 1
-            new_label = Text(str(count_array[val])).scale(0.5).move_to(count_array_mob[1][val][1].get_center())
-            count_array_mob[1][val][1].become(new_label)
 
-            # Resaltar el input_array y count_array_mob en cada iteración
+            # Resaltar la celda actual en input_array
             input_square = input_array_mob[1][i][0]
             input_square.set_fill(YELLOW, opacity=0.5)
 
-            # Resaltar el count_array_mob en cada iteración
-            count_square = count_array_mob[1][val][1]
-            count_square.set_fill(YELLOW, opacity=0.5)
+            # Eliminar el texto anterior y añadir el nuevo texto
+            old_text = count_text_array[val]
+            new_text = Text(str(count_array[val])).scale(0.5).move_to(old_text.get_center())
+            self.remove(old_text)
+            count_text_array[val] = new_text
+            self.add(new_text)
 
             self.wait(0.5)
             input_square.set_fill(WHITE, opacity=0)
-            count_square.set_fill(WHITE, opacity=0)
 
         self.wait(3)
 
