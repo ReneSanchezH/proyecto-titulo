@@ -1,5 +1,6 @@
 "use client";
 
+// src/components/ChatInput.js
 import { db } from "@/utils/firebase";
 import { ArrowUpIcon } from "@heroicons/react/24/solid";
 import { addDoc, collection, serverTimestamp, updateDoc, doc } from "firebase/firestore";

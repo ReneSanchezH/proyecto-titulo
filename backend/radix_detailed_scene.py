@@ -1,6 +1,6 @@
 from manim import *
 
-class RadixDetailedScene(Scene):
+class RadixDetailed(Scene):
     def __init__(self, integer_array, **kwargs):
         self.integer_array = integer_array
         super().__init__(**kwargs)
@@ -25,7 +25,7 @@ class RadixDetailedScene(Scene):
         self.wait(3)
         self.play(FadeOut(intro_text))
 
-        # Determine the scale factor based on array length
+        # Determinar el factor de escala para los cuadrados
         if array_length <= 5:
             scale_factor = 1.2
         elif array_length <= 7:
@@ -37,7 +37,7 @@ class RadixDetailedScene(Scene):
         else:
             scale_factor = 0.5
 
-        # Create the initial empty squares
+        # crear los cuadrados 
         squares = VGroup(*[Square(side_length=1).scale(scale_factor) for _ in integer_array])
         squares.arrange(RIGHT, buff=0)
         squares.shift(UP * 1.5)
@@ -45,7 +45,7 @@ class RadixDetailedScene(Scene):
         self.play(Create(squares))
         self.wait(1)
 
-        # Create the numbers and place them in the squares
+        # crear los números en los cuadrados
         num_texts = VGroup(*[Text(str(num)).scale(scale_factor * 0.8) for num in integer_array])
         for idx, num_text in enumerate(num_texts):
             num_text.move_to(squares[idx].get_center())
@@ -53,7 +53,7 @@ class RadixDetailedScene(Scene):
         self.play(*[FadeIn(num_text) for num_text in num_texts])
         self.wait(1)
 
-        # Create the buckets
+        # crear los buckets
         bucket_height = 1.5
         bucket_width = 0.7
         bucket_spacing = 0.6
@@ -61,12 +61,12 @@ class RadixDetailedScene(Scene):
         buckets.arrange(RIGHT, buff=bucket_spacing)
         buckets.next_to(squares, DOWN, buff=1)
 
-        self.add(buckets)  # Add buckets without animation
+        self.add(buckets)  
         self.wait(1)
 
-        # Create the labels manually and adjust spacing
+        # crear etiquetas para los cubos
         labels = VGroup(*[Text(str(i)).scale(0.5).next_to(buckets[i], UP, buff=0.1) for i in range(10)])
-        self.add(labels)  # Add labels without animation
+        self.add(labels) 
         self.wait(1)
 
         def counting_sort(arr, exp):
@@ -94,10 +94,10 @@ class RadixDetailedScene(Scene):
         def radix_sort(arr):
             max1 = max(arr)
             exp = 1
-            steps = [arr[:]]  # Record the initial state
+            steps = [arr[:]]  # guardar el estado inicial
             while max1 // exp > 0:
                 counting_sort(arr, exp)
-                steps.append(arr[:])  # Record state after each counting sort pass
+                steps.append(arr[:])  # guardar el estado actual
                 exp *= 10
             return steps
 
@@ -150,6 +150,3 @@ class RadixDetailedScene(Scene):
         self.play(FadeIn(final_text))
         self.wait(2)
 
-integer_array = [10, 123, 456, 789, 4]
-scene = RadixDetailedScene(integer_array)
-scene.render()

@@ -1,6 +1,6 @@
 from manim import *
 
-class RadixSortScene(Scene):
+class RadixSort(Scene):
     def __init__(self, integer_array, **kwargs):
         self.integer_array = integer_array
         super().__init__(**kwargs)
@@ -54,8 +54,6 @@ class RadixSortScene(Scene):
             bucket_group.add(VGroup(label, bucket).arrange(DOWN, buff=0.1))
 
         bucket_group.arrange(RIGHT, buff=0.5).shift(DOWN * 2)
-        self.play(FadeIn(bucket_group))
-        self.wait(2)
 
         # Radix Sort
         def counting_sort(arr, exp):
@@ -97,22 +95,22 @@ class RadixSortScene(Scene):
         # Copiar el arreglo original para preservarlo
         sorted_array = integer_array[:]
         
-        # Ordenar el arreglo usando Radix Sort
-        radix_sort(sorted_array)
-
         # Animar los pasos del ordenamiento
         for i, exp in enumerate([1, 10, 100], start=1):
-            # Mostrar el conteo y reordenamiento para cada dígito
-            intermediate_array = integer_array[:]
-            counting_sort(intermediate_array, exp)
-            string_intermediate_array = [str(num) for num in intermediate_array]
-            new_table = Table([string_intermediate_array], include_outer_lines=True).scale(scale_factor)
-
             # Crear un texto para indicar la etapa
             stage_text = Text(f"Etapa {i}: Ordenando por el dígito de las {['unidades', 'decenas', 'centenas'][i-1]}").scale(0.5).to_edge(UP)
             
-            self.play(Transform(table, new_table), FadeIn(stage_text))
-            self.wait(1)
+            # Mostrar el texto de la etapa y esperar antes de ordenar
+            self.play(FadeIn(stage_text))
+            self.wait(2)
+
+            # Mostrar el conteo y reordenamiento para cada dígito
+            counting_sort(sorted_array, exp)
+            string_intermediate_array = [str(num) for num in sorted_array]
+            new_table = Table([string_intermediate_array], include_outer_lines=True).scale(scale_factor)
+
+            self.play(Transform(table, new_table))
+            self.wait(2)
             self.play(FadeOut(stage_text))
 
         # Mostrar la tabla final ordenada

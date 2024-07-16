@@ -1,4 +1,5 @@
 "use client";
+// src/components/Chat.js
 
 import { db } from "@/utils/firebase";
 import { collection, orderBy, query } from "firebase/firestore";
